@@ -5,12 +5,14 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 
 export class TaskRepository {  
   /**
-   * Retrieves all tasks from the database.
+   * Retrieves all user tasks from the database.
    * @returns A promise that resolves to an array of all tasks.
   */
-  async findAll(query: GetTasksDto) {
+  async findAll(userId: string, query: GetTasksDto) {
     const filter: any = {};
     
+    filter.createdBy = userId;
+
     if (query.title) filter.title = { $regex: query.title, $options: "i" };
     if (query.status) filter.status = query.status;
     if (query.category) filter.category = query.category;
@@ -28,41 +30,48 @@ export class TaskRepository {
 
 
   /**
-   * Retrieves a task by its id.
+   * Retrieves a user task by its id and userId.
+   * @param userId - The current user id.
    * @param id - The id of the task to retrieve.
    * @returns A promise that resolves to the task with the specified id, or null if no such task exists.
   */
-  async findById(id: string) {
-    return Task.findById(id).lean();
+  async findById(userId: string, id: string) {
+    return Task.findById(id).where({ createdBy: userId }).lean();
   }
 
   /**
-   * Creates a new task in the database.
+   * Creates a new user task in the database.
+   * @param userId - The current user id.
    * @param data - The data for the task to be created.
    * @returns A promise that resolves to the created task.
   */
-  async create(data: CreateTaskDto) {
-    const task = new Task(data);
+  async create(userId: string, data: CreateTaskDto) {
+    const task = new Task({ ...data, userId });
     const saveTask = await task.save(); 
     return saveTask.toObject();
   }
 
   /**
-   * Updates a task in the database.
+   * Updates a user task in the database.
+   * @param userId - The current user id.
    * @param id - The id of the task to update.
    * @param updateData - The data to update the task with.
    * @returns A promise that resolves to the updated task.
   */
-  async update(id: string, updateData: UpdateTaskDto) {
-    return Task.findByIdAndUpdate(id, updateData, { new: true }).lean();
+  async update(userId: string, id: string, updateData: UpdateTaskDto) {
+    return Task
+      .findByIdAndUpdate(id, updateData, { new: true })
+      .where({ createdBy: userId })
+      .lean();
   }
 
   /**
-   * Deletes a task from the database.
+   * Deletes a user task from the database.
+   * @param userId - The current user id.
    * @param id - The id of the task to delete.
    * @returns A promise that resolves to the deleted task.
   */
-  async delete(id: string) {
-    return Task.findByIdAndDelete(id);
+  async delete(userId: string, id: string) {
+    return Task.findByIdAndDelete(id).where({ createdBy: userId });
   }
 }

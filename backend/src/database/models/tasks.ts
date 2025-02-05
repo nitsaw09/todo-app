@@ -25,7 +25,7 @@ export interface ITask extends Document {
   description: string;
   status: string;
   priority: string;
-  dueDate?: Date;
+  createdBy?: string
   createdAt?: Date; 
   updatedAt?: Date; 
 }
@@ -61,6 +61,11 @@ const taskSchema = new Schema<ITask>(
       index: true, 
       enum: Object.values(TaskPriority), 
       default: 'Medium' 
+    },
+    createdBy: {
+      type: String, 
+      trim: true, 
+      ref: 'User'
     }
   },
   {

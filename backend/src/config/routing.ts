@@ -10,5 +10,9 @@ export const routingControllerOptions = {
   defaultErrorHandler: false,
   validation: true, 
   classTransformer: true, 
-  routePrefix: '/api'
+  routePrefix: '/api',
+  currentUserChecker: async (action: Action) => {
+    const token = action.request.headers['authorization']?.split(' ')[1];
+    return jwt.verify(token, process.env.JWT_SECRET || 'secret');
+  }
 }

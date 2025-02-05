@@ -15,7 +15,7 @@ export class TaskController {
   }
 
   /**
-   * Retrieves all tasks from the database.
+   * Retrieves all user tasks from the database.
    * @returns A promise that resolves to an array of all tasks.
   */
   @Get('/')
@@ -23,12 +23,15 @@ export class TaskController {
     summary: 'Get all tasks',
     security: [{ bearerAuth: [] }] 
   })
-  async getAllTasks(@QueryParams() query: GetTasksDto) {
-    return await this.taskService.getAllTasks(query);
+  async getAllTasks(
+    @CurrentUser() currentUser: { userId: string }, 
+    @QueryParams() query: GetTasksDto
+  ) {
+    return await this.taskService.getAllTasks(currentUser?.userId, query);
   }
 
   /**
-   * Creates a new task in the database.
+   * Creates a new user task in the database.
    * @param createTaskDto - The data for the task to be created.
    * @returns A promise that resolves to the created task.
   */
@@ -43,12 +46,16 @@ export class TaskController {
     }
   })
   @HttpCode(201)
-  async createTask(@Body() createTaskDto: CreateTaskDto) {
-    return await this.taskService.createTask(createTaskDto);
+  async createTask(
+    @CurrentUser() currentUser: { userId: string }, 
+    @Body() createTaskDto: CreateTaskDto
+  ) {
+    return await this.taskService.createTask(currentUser?.userId, createTaskDto);
   }
 
   /**
-   * Retrieves a task by its id.
+   * Retrieves a user task by its id and userId.
+   * @param userId - The current user id.
    * @param id - The id of the task to retrieve.
    * @returns A promise that resolves to the task with the specified id, or null if no such task exists.
   */
@@ -57,12 +64,16 @@ export class TaskController {
     summary: 'Get task by id',
     security: [{ bearerAuth: [] }] 
   })
-  async getTaskById(@Param('id') id: string) {
-    return await this.taskService.getTaskById(id);
+  async getTaskById(
+    @CurrentUser() currentUser: { userId: string }, 
+    @Param('id') id: string
+  ) {
+    return await this.taskService.getTaskById(currentUser?.userId, id);
   }
 
   /**
-   * Updates a task in the database.
+   * Updates a user task in the database.
+   * @param userId - The current user id.
    * @param id - The id of the task to update.
    * @param updateTaskDto - The data to update the task with.
    * @returns A promise that resolves to the updated task.
@@ -80,12 +91,17 @@ export class TaskController {
       }
     }
    })
-  async updateTask(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return await this.taskService.updateTask(id, updateTaskDto);
+  async updateTask(
+    @CurrentUser() currentUser: { userId: string }, 
+    @Param('id') id: string, 
+    @Body() updateTaskDto: UpdateTaskDto
+  ) {
+    return await this.taskService.updateTask(currentUser?.userId, id, updateTaskDto);
   }
 
   /**
-   * Deletes a task from the database.
+   * Deletes a user task from the database.
+   * @param userId - The current user id.
    * @param id - The id of the task to delete.
    * @returns A promise that resolves to a response indicating the task was deleted.
   */
@@ -102,7 +118,10 @@ export class TaskController {
       }
     }
   })
-  async deleteTask(@Param('id') id: string) {
-    return await this.taskService.deleteTask(id);
+  async deleteTask(
+    @CurrentUser() currentUser: { userId: string }, 
+    @Param('id') id: string
+  ) {
+    return await this.taskService.deleteTask(currentUser?.userId, id);
   }
 }

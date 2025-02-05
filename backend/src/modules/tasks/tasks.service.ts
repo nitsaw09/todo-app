@@ -12,11 +12,11 @@ export class TaskService {
   private taskRepository = new TaskRepository();
 
   /**
-   * Retrieves all tasks from the repository.
+   * Retrieves all user tasks from the repository.
    * @returns A promise that resolves to an object containing the data of all tasks.
   */
-  async getAllTasks(query: GetTasksDto) {
-    const tasks = await this.taskRepository.findAll(query);
+  async getAllTasks(userId: string, query: GetTasksDto) {
+    const tasks = await this.taskRepository.findAll(userId, query);
     const response: IResponse<Object> = {};
     response.data = tasks;
     this.logger.info("Retrieved all tasks");
@@ -24,13 +24,14 @@ export class TaskService {
   }
   
   /**
-   * Retrieves a task by its id from the repository.
+   * Retrieves a user task by its userId and id from the repository.
    * @param id - The id of the task to retrieve.
+   * @param userId - The current user id.
    * @returns A promise that resolves to an object containing the data of the task
    * If the task is not found, it throws a NotFoundError.
   */
-  async getTaskById(id: string) {
-    const task = await this.taskRepository.findById(id);
+  async getTaskById(userId: string, id: string) {
+    const task = await this.taskRepository.findById(userId, id);
     if (!task) throw new NotFoundError(errorMessage.TASK_NOTFOUND);
     const response: IResponse<Object> = {};
     response.data = task;
@@ -39,12 +40,13 @@ export class TaskService {
   }
 
   /**
-   * Creates a new task in the repository.
+   * Creates a new user task in the repository.
+   * @param userId - The current user id.
    * @param data - The data for the task to be created.
    * @returns A promise that resolves to an object containing the created task data and a success message.
   */
-  async createTask(data: CreateTaskDto) {
-    const newTask = await this.taskRepository.create(data);
+  async createTask(userId: string, data: CreateTaskDto) {
+    const newTask = await this.taskRepository.create(userId, data);
     const response: IResponse<Object> = {};
     response.data = newTask;
     response.message = successMessage.TASK_CREATED;
@@ -53,14 +55,15 @@ export class TaskService {
   }
 
   /**
-   * Updates a task in the repository.
+   * Updates a user task in the repository.
+   * @param userId - The current userId.
    * @param id - The id of the task to update.
    * @param updateData - The data to update the task with.
    * @returns A promise that resolves to an object containing the updated task data and a success message.
    * If the task is not found, it throws a NotFoundError.
   */
-  async updateTask(id: string, updateData: UpdateTaskDto) {
-    const updatedTask = await this.taskRepository.update(id, updateData);
+  async updateTask(userId: string, id: string, updateData: UpdateTaskDto) {
+    const updatedTask = await this.taskRepository.update(userId, id, updateData);
     if (!updatedTask) throw new NotFoundError(errorMessage.TASK_NOTFOUND);
     const response: IResponse<Object> = {};
     response.data = updatedTask;
@@ -71,13 +74,14 @@ export class TaskService {
 
   
   /**
-   * Deletes a task from the repository.
+   * Deletes a user task from the repository.
+   * @param userId - The current userId.
    * @param id - The id of the task to delete.
    * @returns A promise that resolves to an object containing a success message.
    * If the task is not found, it throws a NotFoundError.
   */
-  async deleteTask(id: string) {
-    const deletedTask = await this.taskRepository.delete(id);
+  async deleteTask(userId: string, id: string) {
+    const deletedTask = await this.taskRepository.delete(userId, id);
     if (!deletedTask) throw new NotFoundError(errorMessage.TASK_NOTFOUND);
     const response: IResponse<Object> = {};
     response.message = successMessage.TASK_DELETED;
